@@ -57,6 +57,10 @@
                                 								
                                 <option id="gnu.c.compiler.option.optimization.flags.749957019" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-march=armv8-a -mfloat-abi=hard -mfpu=neon-fp-armv8" valueType="string"/>
                                 								
+                                <option id="gnu.c.compiler.option.dialect.std.109203215" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.flags.1178770537" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="" valueType="string"/>
+                                								
                                 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.29178149" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
                                 							
                             </tool>
@@ -74,6 +78,12 @@
                                 </option>
                                 								
                                 <option id="gnu.cpp.compiler.option.optimization.flags.533813337" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-march=armv8-a -mfloat-abi=hard -mfpu=neon-fp-armv8" valueType="string"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.std.90057260" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.flags.123905064" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-std=c++17" valueType="string"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.other.other.342661536" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -Wno-psabi" valueType="string"/>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1703208189" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
                                 							
@@ -193,6 +203,8 @@
                                     								
                                 </option>
                                 								
+                                <option id="gnu.c.compiler.option.dialect.flags.919524303" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="" valueType="string"/>
+                                								
                                 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.219477985" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
                                 							
                             </tool>
@@ -210,6 +222,10 @@
                                 </option>
                                 								
                                 <option id="gnu.cpp.compiler.option.optimization.flags.1515357494" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-march=armv8-a -mfloat-abi=hard -mfpu=neon-fp-armv8" valueType="string"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.flags.387726928" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-std=c++14" valueType="string"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.other.other.400923993" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -Wno-psabi" valueType="string"/>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.31390653" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
                                 							
@@ -237,7 +253,7 @@
                                     								
                                 </option>
                                 								
-                                <option id="gnu.cpp.link.option.strip.1717533235" superClass="gnu.cpp.link.option.strip" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+                                <option id="gnu.cpp.link.option.strip.1717533235" name="Omit all symbol information (-s)" superClass="gnu.cpp.link.option.strip" useByScannerDiscovery="false" value="true" valueType="boolean"/>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1800249263" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
                                     									
@@ -319,7 +335,21 @@
     	
     <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
     	
-    <storageModule moduleId="refreshScope"/>
+    <storageModule moduleId="refreshScope" versionNumber="2">
+        		
+        <configuration configurationName="Debug">
+            			
+            <resource resourceType="PROJECT" workspacePath="/battery-control"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="Release">
+            			
+            <resource resourceType="PROJECT" workspacePath="/battery-control"/>
+            		
+        </configuration>
+        	
+    </storageModule>
     	
     <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
     
