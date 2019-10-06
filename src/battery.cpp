@@ -46,6 +46,8 @@ typedef struct voltage_time_pair {
 	long timeDiff;
 } voltage_time_pair_t;
 
+static map<double, long> voltTimes_;
+
 //############ battery voltage ################
 double numberToVoltage(int num) {
 	if (num == 0) return 0;
@@ -136,58 +138,70 @@ double stringToVolts(string& str) {
 	return v;
 }
 
-void parseVoltageTimesFromLog(string file, map<double, long>& voltTimes) {
-	ifstream logFile(file);
-	if (logFile.is_open()) {
-		vector<string> log;
+void parseVoltageTimesFromLog(string file) {
+	vector<string> log;
+
+	// read rotated (previous) log file
+	ifstream logFile1(file + ".1");
+	if (logFile1.is_open()) {
 		string line;
-		while (getline(logFile, line)) {
+		while (getline(logFile1, line)) {
 			log.push_back(line);
 		}
-		logFile.close();
+		logFile1.close();
+	}
 
-		int mode = 0;
-		long fullyCharged = 0;
-
-		for (vector<string>::reverse_iterator rit = log.rbegin(); rit!= log.rend(); ++rit) {
-			vector<string> tokens = split(*rit, ',');
-			if (tokens.size() < 4) continue;
-			string status = tokens[3];
-
-			if (mode == 0) {
-				if (status.compare("fully-charged") != 0) {
-					continue;
-				}
-				mode = 1;
-			}
-			if (mode == 1) {
-				if (status.compare("fully-charged") == 0) {
-					fullyCharged = stringToTime(tokens[0]);
-					continue;
-				}
-				mode = 2;
-			}
-			if (mode == 2) {
-				if (status.rfind("charging", 0) == 0) {
-					time_t t = stringToTime(tokens[0]);
-					if (t == 0) continue;
-
-					double v = stringToVolts(tokens[1]);
-					if (v == 0) continue;
-
-					voltTimes[v] = fullyCharged - t;
-				} else {
-					mode = 3;
-				}
-			}
-			if (mode == 3) break;
+	// read current log file
+	ifstream logFile2(file);
+	if (logFile2.is_open()) {
+		string line;
+		while (getline(logFile2, line)) {
+			log.push_back(line);
 		}
+		logFile2.close();
+	}
+
+	int mode = 0;
+	long fullyCharged = 0;
+
+	for (vector<string>::reverse_iterator rit = log.rbegin(); rit!= log.rend(); ++rit) {
+		vector<string> tokens = split(*rit, ',');
+		if (tokens.size() < 4) continue;
+		string status = tokens[3];
+
+		if (mode == 0) {
+			if (status.compare("fully-charged") != 0) {
+				continue;
+			}
+			mode = 1;
+		}
+		if (mode == 1) {
+			if (status.compare("fully-charged") == 0) {
+				fullyCharged = stringToTime(tokens[0]);
+				continue;
+			}
+			mode = 2;
+		}
+		if (mode == 2) {
+			if (status.rfind("charging", 0) == 0) {
+				time_t t = stringToTime(tokens[0]);
+				if (t == 0) continue;
+
+				double v = stringToVolts(tokens[1]);
+				if (v == 0) continue;
+
+				voltTimes_[v] = fullyCharged - t;
+			} else {
+				mode = 3;
+			}
+		}
+		if (mode == 3) break;
 	}
 }
 
-void updateVoltageTimesFromHistory(string file, map<double, long>& voltTimes) {
-	double minVolts = voltTimes.begin()->first;
-	long maxDiff = voltTimes.begin()->second;
+void updateVoltageTimesFromHistory(string file) {
+	double minVolts = voltTimes_.begin()->first;
+	long maxDiff = voltTimes_.begin()->second;
 
 	ifstream vtFile(file, ios::binary);
 	if (vtFile.is_open()) {
@@ -198,7 +212,7 @@ void updateVoltageTimesFromHistory(string file, map<double, long>& voltTimes) {
 			vtFile.read((char*)&vtp, sizeof(voltage_time_pair_t));
 
 			if (vtp.voltage < minVolts) {
-				voltTimes[vtp.voltage] = max(vtp.timeDiff, maxDiff);
+				voltTimes_[vtp.voltage] = max(vtp.timeDiff, maxDiff);
 			} else {
 				break;
 			}
@@ -207,12 +221,12 @@ void updateVoltageTimesFromHistory(string file, map<double, long>& voltTimes) {
 	}
 }
 
-void writeVoltageTimesToFile(string file, map<double, long>& voltTimes) {
+void writeVoltageTimesToFile(string file) {
 	ofstream vtFile(file, ios::binary);
-	size_t size = voltTimes.size();
+	size_t size = voltTimes_.size();
 	vtFile.write((char*)&size, sizeof(size_t));
 
-	for (const auto& kv : voltTimes) {
+	for (const auto& kv : voltTimes_) {
 		voltage_time_pair_t vtp = {kv.first, kv.second};
 		vtFile.write((char*)&vtp, sizeof(voltage_time_pair_t));
 
@@ -220,15 +234,15 @@ void writeVoltageTimesToFile(string file, map<double, long>& voltTimes) {
 	vtFile.close();
 }
 
-long getVoltageTime(map<double, long> &voltTimes, double key) {
-	map<double, long>::iterator it = voltTimes.find(key);
-	if (it != voltTimes.end()) {
+long getVoltageTime(double key) {
+	map<double, long>::iterator it = voltTimes_.find(key);
+	if (it != voltTimes_.end()) {
 		return it->second;
 	}
 
-	map<double, long>::iterator near = voltTimes.lower_bound(key);
-	if (near != voltTimes.end()) {
-		if (near == voltTimes.begin()) {
+	map<double, long>::iterator near = voltTimes_.lower_bound(key);
+	if (near != voltTimes_.end()) {
+		if (near == voltTimes_.begin()) {
 			return near->second;
 		}
 
@@ -243,8 +257,8 @@ long getVoltageTime(map<double, long> &voltTimes, double key) {
 	}
 }
 
-string getDurationEstimate(map<double, long> &voltTimes, double volts) {
-	long estimation = getVoltageTime(voltTimes, volts);
+string getDurationEstimate(double volts) {
+	long estimation = getVoltageTime(volts);
 	int seconds = estimation % 60;
 	int minutes = (estimation / 60) % 60;
 	int hours = (estimation / 60 / 60) % 60;
@@ -254,6 +268,12 @@ string getDurationEstimate(map<double, long> &voltTimes, double volts) {
 	ss << setw(2) << setfill('0') << minutes << ":";
 	ss << setw(2) << setfill('0') << seconds;
 	return ss.str();
+}
+
+void updateVoltageHistory() {
+	parseVoltageTimesFromLog(LOG_FILE);
+	updateVoltageTimesFromHistory(BIN_FILE);
+	writeVoltageTimesToFile(BIN_FILE);
 }
 //#############################################
 
@@ -280,18 +300,13 @@ int main(int argc, char *argv[]) {
 	mcp3004Setup(200, 0);
 	pinMode(PIN_ANALOG1, INPUT);
 
-	// load and build voltage history
-	map<double, long> voltTimes;
-	parseVoltageTimesFromLog(LOG_FILE, voltTimes);
-	updateVoltageTimesFromHistory(BIN_FILE, voltTimes);
-	writeVoltageTimesToFile(BIN_FILE, voltTimes);
-
 	// discard first reading
 	getBatteryVoltage();
 
 	ofstream logFile;
 	int lowLevelCount = 0;
 	double voltageLine = 0;
+	int prev_status = NOT_CHARGING;
 
 	// main loop
 	while (1) {
@@ -304,14 +319,18 @@ int main(int argc, char *argv[]) {
 				<< getBatteryVoltagePercentage(voltage) << "%, ";
 
 		string cellMap;
-		switch (getChargingStatus(cellMap)) {
+		int status = getChargingStatus(cellMap);
+		switch (status) {
 		case NOT_CHARGING:
 			logFile << "not-charging"; break;
 		case CHARGING:
 			logFile << "charging, " << cellMap;
+			if (prev_status != CHARGING) {
+				updateVoltageHistory();
+			}
 			if (voltage > voltageLine) {
 				voltageLine = voltage;
-				logFile  << ", " << getDurationEstimate(voltTimes, voltage);
+				logFile  << ", " << getDurationEstimate(voltage);
 			}
 			break;
 		case FULLY_CHARGED:
@@ -321,7 +340,7 @@ int main(int argc, char *argv[]) {
 		logFile << endl;
 		logFile.close();
 
-		if (voltage < 18) {
+		if (status == NOT_CHARGING && voltage < 18) {
 			if (lowLevelCount >= 3) {
 				haltSystem();
 			}
@@ -329,5 +348,7 @@ int main(int argc, char *argv[]) {
 		} else {
 			lowLevelCount = 0;
 		}
+
+		prev_status = status;
 	}
 }
