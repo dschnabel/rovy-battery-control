@@ -80,7 +80,6 @@ double getBatteryVoltage() {
 double getBatteryVoltagePercentage(double voltage) {
 	double percentage = (voltage - VOLTAGE_MIN) * 100 / (VOLTAGE_MAX - VOLTAGE_MIN);
 	return max(percentage, 0.0);
-
 }
 //#############################################
 
