@@ -326,14 +326,15 @@ void haltSystem() {
 	system("halt");
 }
 
-void sigint(int s){
+void terminate(int s){
 	i2c0Unlock();
 	spi0Unlock();
-	exit(1);
+	exit(0);
 }
 
 int main(int argc, char *argv[]) {
-	signal(SIGINT, sigint);
+	signal(SIGINT, terminate);
+	signal(SIGTERM, terminate);
 
 	wiringPiSetup();
 
