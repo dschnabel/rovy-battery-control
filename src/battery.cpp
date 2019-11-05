@@ -7,10 +7,13 @@
 #include <ctime>
 #include <vector>
 #include <map>
+#include <signal.h>
 
 #include <wiringpi/wiringPi.h>
 #include <wiringpi/mcp23017.h>
 #include <wiringpi/mcp3004.h>
+
+#include "shared_mutex.h"
 
 using namespace std;
 
@@ -48,6 +51,37 @@ typedef struct voltage_time_pair {
 
 static map<double, long> voltTimes_;
 
+//################# mutex #####################
+shared_mutex_t i2c0Mutex = shared_mutex_init((char*)"/i2c0");
+shared_mutex_t spi0Mutex = shared_mutex_init((char*)"/spi0");
+bool usingI2C0Mutex = false;
+bool usingSPI0Mutex = false;
+
+void i2c0Lock() {
+	pthread_mutex_lock(i2c0Mutex.ptr);
+	usingI2C0Mutex = true;
+}
+
+void i2c0Unlock() {
+	if (usingI2C0Mutex) {
+		pthread_mutex_unlock(i2c0Mutex.ptr);
+		usingI2C0Mutex = false;
+	}
+}
+
+void spi0Lock() {
+	pthread_mutex_lock(spi0Mutex.ptr);
+	usingSPI0Mutex = true;
+}
+
+void spi0Unlock() {
+	if (usingSPI0Mutex) {
+		pthread_mutex_unlock(spi0Mutex.ptr);
+		usingSPI0Mutex = false;
+	}
+}
+//#############################################
+
 //############ battery voltage ################
 double numberToVoltage(int num) {
 	if (num == 0) return 0;
@@ -67,6 +101,8 @@ double getBatteryVoltage() {
 	double voltNumber = 0;
 	int iterations = 10;
 
+	i2c0Lock();
+	spi0Lock();
 	digitalWrite(PIN_READ_VOLT, 1);
 	for (int i = 0; i < iterations; i++) {
 		digitalWrite(PIN_ADC_ENABLE, CS_ENABLE);
@@ -74,6 +110,8 @@ double getBatteryVoltage() {
 		digitalWrite(PIN_ADC_ENABLE, CS_DISABLE);
 	}
 	digitalWrite(PIN_READ_VOLT, 0);
+	spi0Unlock();
+	i2c0Unlock();
 
 	voltNumber /= iterations;
 	return numberToVoltage(voltNumber);
@@ -87,15 +125,22 @@ double getBatteryVoltagePercentage(double voltage) {
 
 //############ charging #######################
 int getChargingStatus(string &cellMap) {
+	i2c0Lock();
+
 	if (!digitalRead(PIN_CHARGING)) {
+		i2c0Unlock();
 		return NOT_CHARGING;
 	}
+
 	bool done = true;
 	for (int i = PIN_BAT6; i >= PIN_BAT1; i--) {
 		int status = digitalRead(i);
 		if (!status) done = false;
 		cellMap += to_string(status);
 	}
+
+	i2c0Unlock();
+
 	if (done) return FULLY_CHARGED;
 	else return CHARGING;
 }
@@ -281,10 +326,19 @@ void haltSystem() {
 	system("halt");
 }
 
+void sigint(int s){
+	i2c0Unlock();
+	spi0Unlock();
+	exit(1);
+}
+
 int main(int argc, char *argv[]) {
+	signal(SIGINT, sigint);
+
 	wiringPiSetup();
 
 	// setup mcp23017 (16-bit IO expansion)
+	i2c0Lock();
 	mcp23017Setup(100, 0x20) ;
 	pinMode(PIN_CHARGING, INPUT);
 	pinMode(PIN_BAT1, INPUT);
@@ -295,10 +349,13 @@ int main(int argc, char *argv[]) {
 	pinMode(PIN_BAT6, INPUT);
 	pinMode(PIN_ADC_ENABLE, OUTPUT);
 	pinMode(PIN_READ_VOLT, OUTPUT);
+	i2c0Unlock();
 
 	// setup mcp3008 (analog to digital converter)
+	spi0Lock();
 	mcp3004Setup(200, 0);
 	pinMode(PIN_ANALOG1, INPUT);
+	spi0Unlock();
 
 	// discard first reading
 	getBatteryVoltage();
