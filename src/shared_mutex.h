@@ -49,6 +49,8 @@ typedef struct shared_mutex_t {
                         // of a new shared mutex.
                         // Equals 0 (false) if this mutex was
                         // just retrieved from shared memory.
+  int *data_init;
+  void *data;
 } shared_mutex_t;
 
 // Initialize a new shared mutex with given `name`. If a mutex
@@ -67,7 +69,7 @@ typedef struct shared_mutex_t {
 // There is no workaround currently, except to run first
 // initialization only before multi-threaded or multi-process
 // functionality.
-shared_mutex_t shared_mutex_init(char *name);
+shared_mutex_t shared_mutex_init(char *name, size_t data_len);
 
 // Close access to the shared mutex and free all the resources,
 // used by the structure.

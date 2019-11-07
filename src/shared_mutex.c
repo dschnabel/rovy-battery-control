@@ -33,9 +33,11 @@ SOFTWARE.
 #include <stdlib.h> // malloc, free
 #include <string.h> // strcpy
 
-shared_mutex_t shared_mutex_init(char *name) {
-  shared_mutex_t mutex = {NULL, 0, NULL, 0};
+shared_mutex_t shared_mutex_init(char *name, size_t data_len) {
+  shared_mutex_t mutex = {NULL, 0, NULL, 0, NULL, NULL};
   errno = 0;
+  int data_init_len = data_len > 0 ? sizeof(int) : 0;
+  size_t total_size = sizeof(pthread_mutex_t) + data_init_len + data_len;
 
   // Open existing shared memory object, or create one.
   // Two separate calls are needed here, to mark fact of creation
@@ -51,8 +53,8 @@ shared_mutex_t shared_mutex_init(char *name) {
   }
 
   // Truncate shared memory segment so it would contain
-  // pthread_mutex_t.
-  if (ftruncate(mutex.shm_fd, sizeof(pthread_mutex_t)) != 0) {
+  // pthread_mutex_t + the extra data we want to share.
+  if (ftruncate(mutex.shm_fd, total_size) != 0) {
     perror("ftruncate");
     return mutex;
   }
@@ -60,7 +62,7 @@ shared_mutex_t shared_mutex_init(char *name) {
   // Map pthread mutex into the shared memory.
   void *addr = mmap(
     NULL,
-    sizeof(pthread_mutex_t),
+    total_size,
     PROT_READ|PROT_WRITE,
     MAP_SHARED,
     mutex.shm_fd,
@@ -72,9 +74,16 @@ shared_mutex_t shared_mutex_init(char *name) {
   }
   pthread_mutex_t *mutex_ptr = (pthread_mutex_t *)addr;
 
+  if (data_len > 0) {
+	  mutex.data_init = addr + sizeof(pthread_mutex_t);
+	  mutex.data = mutex.data_init + data_init_len;
+  }
+
   // If shared memory was just initialized -
   // initialize the mutex as well.
   if (mutex.created) {
+	memset(addr, 0, total_size);
+
     pthread_mutexattr_t attr;
     if (pthread_mutexattr_init(&attr)) {
       perror("pthread_mutexattr_init");
@@ -132,3 +141,4 @@ int shared_mutex_destroy(shared_mutex_t mutex) {
   free(mutex.name);
   return 0;
 }
+
