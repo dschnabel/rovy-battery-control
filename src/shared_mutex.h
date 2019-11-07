@@ -20,7 +20,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-*/
+ */
 
 #ifndef SHARED_MUTEX_H
 #define SHARED_MUTEX_H
@@ -29,9 +29,9 @@ SOFTWARE.
 #define _DEFAULT_SOURCE // for ftruncate
 #endif
 
-#include <pthread.h> // pthread_mutex_t, pthread_mutexattr_t,
-                     // pthread_mutexattr_init, pthread_mutexattr_setpshared,
-                     // pthread_mutex_init, pthread_mutex_destroy
+#include <pthread.h> 	// pthread_mutex_t, pthread_mutexattr_t,
+						// pthread_mutexattr_init, pthread_mutexattr_setpshared,
+						// pthread_mutex_init, pthread_mutex_destroy
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,18 +39,18 @@ extern "C" {
 
 // Structure of a shared mutex.
 typedef struct shared_mutex_t {
-  pthread_mutex_t *ptr; // Pointer to the pthread mutex and
-                        // shared memory segment.
-  int shm_fd;           // Descriptor of shared memory object.
-  char* name;           // Name of the mutex and associated
-                        // shared memory object.
-  int created;          // Equals 1 (true) if initialization
-                        // of this structure caused creation
-                        // of a new shared mutex.
-                        // Equals 0 (false) if this mutex was
-                        // just retrieved from shared memory.
-  int *data_init;
-  void *data;
+	pthread_mutex_t *ptr; 	// Pointer to the pthread mutex and
+							// shared memory segment.
+	int shm_fd;           	// Descriptor of shared memory object.
+	char* name;           	// Name of the mutex and associated
+							// shared memory object.
+	int created;          	// Equals 1 (true) if initialization
+							// of this structure caused creation
+							// of a new shared mutex.
+							// Equals 0 (false) if this mutex was
+							// just retrieved from shared memory.
+	int *data_init;
+	void *data;
 } shared_mutex_t;
 
 // Initialize a new shared mutex with given `name`. If a mutex
