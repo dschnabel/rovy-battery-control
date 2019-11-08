@@ -63,11 +63,13 @@ bool usingI2C0Mutex = false;
 bool usingSPI0Mutex = false;
 
 void i2c0Lock() {
-	pthread_mutex_lock(i2c0Mutex.ptr);
-	usingI2C0Mutex = true;
-	// load shared data
-	if (*i2c0Mutex.data_init && mcp23017_node) {
-		memcpy(&mcp23017_node->data2, i2c0Mutex.data, mcp23017_data_len);
+	if (!usingI2C0Mutex) {
+		pthread_mutex_lock(i2c0Mutex.ptr);
+		usingI2C0Mutex = true;
+		// load shared data
+		if (*i2c0Mutex.data_init && mcp23017_node) {
+			memcpy(&mcp23017_node->data2, i2c0Mutex.data, mcp23017_data_len);
+		}
 	}
 }
 
