@@ -13,7 +13,7 @@
 #include <wiringpi/mcp23017.h>
 #include <wiringpi/mcp3004.h>
 
-#include "shared_mutex.h"
+#include <gpio_mutex.h>
 
 using namespace std;
 
@@ -50,51 +50,6 @@ typedef struct voltage_time_pair {
 } voltage_time_pair_t;
 
 static map<double, long> voltTimes_;
-
-//################# mutex #####################
-extern struct wiringPiNodeStruct *wiringPiNodes;
-
-struct wiringPiNodeStruct *mcp23017_node = NULL;
-size_t mcp23017_data_len = sizeof(unsigned int /*data2*/) + sizeof(unsigned int /*data3*/);
-
-shared_mutex_t i2c0Mutex = shared_mutex_init((char*)"/i2c0", mcp23017_data_len);
-shared_mutex_t spi0Mutex = shared_mutex_init((char*)"/spi0", 0);
-bool usingI2C0Mutex = false;
-bool usingSPI0Mutex = false;
-
-void i2c0Lock() {
-	if (!usingI2C0Mutex) {
-		pthread_mutex_lock(i2c0Mutex.ptr);
-		usingI2C0Mutex = true;
-		// load shared data
-		if (*i2c0Mutex.data_init && mcp23017_node) {
-			memcpy(&mcp23017_node->data2, i2c0Mutex.data, mcp23017_data_len);
-		}
-	}
-}
-
-void i2c0Unlock() {
-	if (usingI2C0Mutex) {
-		// store shared data
-		memcpy(i2c0Mutex.data, &mcp23017_node->data2, mcp23017_data_len);
-		*i2c0Mutex.data_init = 1;
-		pthread_mutex_unlock(i2c0Mutex.ptr);
-		usingI2C0Mutex = false;
-	}
-}
-
-void spi0Lock() {
-	pthread_mutex_lock(spi0Mutex.ptr);
-	usingSPI0Mutex = true;
-}
-
-void spi0Unlock() {
-	if (usingSPI0Mutex) {
-		pthread_mutex_unlock(spi0Mutex.ptr);
-		usingSPI0Mutex = false;
-	}
-}
-//#############################################
 
 //############ battery voltage ################
 double numberToVoltage(int num) {
@@ -355,7 +310,6 @@ int main(int argc, char *argv[]) {
 	// setup mcp23017 (16-bit IO expansion)
 	i2c0Lock();
 	mcp23017Setup(100, 0x20);
-	mcp23017_node = wiringPiNodes;
 	pinMode(PIN_CHARGING, INPUT);
 	pinMode(PIN_BAT1, INPUT);
 	pinMode(PIN_BAT2, INPUT);
