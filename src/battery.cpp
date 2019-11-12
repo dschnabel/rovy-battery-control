@@ -41,7 +41,7 @@ using namespace std;
 #define LOG_FILE "/var/log/battery.log"
 #define BIN_FILE "/opt/voltTimes.bin"
 
-#define VOLTAGE_MAX 25.0962
+#define VOLTAGE_MAX 25.2881
 #define VOLTAGE_MIN 18
 
 typedef struct voltage_time_pair {
@@ -55,15 +55,15 @@ static map<double, long> voltTimes_;
 double numberToVoltage(int num) {
 	if (num == 0) return 0;
 
-	static int base = 15;
+	double a = 14.996440966025158;
+	double b = 0.006434246731552911;
+	double c = 0.00001628147629555233;
+	double d = -3.019987848088e-8;
+	double e = 2.605816991e-11;
+	double f = -8.51216e-15;
 
-	double a = -0.004767104;
-	double b = 0.007744394;
-	double c = 0.000004493799;
-	double d = 2.357942e-9;
-
-	// cubic regression
-	return base + (a) + (b * num) + (c * pow(num,2)) - (d * pow(num,3));
+	// quintic regression
+	return (a) + (b * num) + (c * pow(num,2)) + (d * pow(num,3)) + (e * pow(num,4)) + (f * pow(num,5));
 }
 
 double getBatteryVoltage() {
