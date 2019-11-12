@@ -41,7 +41,7 @@ using namespace std;
 #define LOG_FILE "/var/log/battery.log"
 #define BIN_FILE "/opt/voltTimes.bin"
 
-#define VOLTAGE_MAX 25.2881
+#define VOLTAGE_MAX 25.288118
 #define VOLTAGE_MIN 18
 
 typedef struct voltage_time_pair {
@@ -334,13 +334,20 @@ int main(int argc, char *argv[]) {
 	int lowLevelCount = 0;
 	double voltageLine = 0;
 	int prev_status = NOT_CHARGING;
+	int fully_charged_count = 0;
 
 	// main loop
 	while (1) {
 		delay(10000);
 		logFile.open(LOG_FILE, ofstream::out | ofstream::app);
 
-		double voltage = getBatteryVoltage();
+		double voltage;
+		if (fully_charged_count < 5) {
+			voltage = getBatteryVoltage();
+		} else {
+			voltage = VOLTAGE_MAX;
+		}
+
 		logFile << time(0) << ", "
 				<< fixed << setprecision(2) << voltage << "V, "
 				<< getBatteryVoltagePercentage(voltage) << "%, ";
@@ -349,7 +356,9 @@ int main(int argc, char *argv[]) {
 		int status = getChargingStatus(cellMap);
 		switch (status) {
 		case NOT_CHARGING:
-			logFile << "not-charging"; break;
+			logFile << "not-charging";
+			fully_charged_count = 0;
+			break;
 		case CHARGING:
 			logFile << "charging, " << cellMap;
 			if (prev_status != CHARGING) {
@@ -358,6 +367,9 @@ int main(int argc, char *argv[]) {
 			if (voltage > voltageLine) {
 				voltageLine = voltage;
 				logFile  << ", " << getDurationEstimate(voltage);
+			}
+			if (fully_charged_count < 5 && round(voltage*1000000) == round(VOLTAGE_MAX*1000000)) {
+				fully_charged_count++;
 			}
 			break;
 		case FULLY_CHARGED:
