@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
 		logFile.open(LOG_FILE, ofstream::out | ofstream::app);
 
 		double voltage;
-		if (fully_charged_count < 5) {
+		if (fully_charged_count < 10) {
 			voltage = getBatteryVoltage();
 		} else {
 			voltage = VOLTAGE_MAX;
@@ -370,6 +370,8 @@ int main(int argc, char *argv[]) {
 			}
 			if (fully_charged_count < 5 && round(voltage*1000000) == round(VOLTAGE_MAX*1000000)) {
 				fully_charged_count++;
+			} else {
+				fully_charged_count = 0;
 			}
 			break;
 		case FULLY_CHARGED:
