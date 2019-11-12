@@ -368,10 +368,12 @@ int main(int argc, char *argv[]) {
 				voltageLine = voltage;
 				logFile  << ", " << getDurationEstimate(voltage);
 			}
-			if (fully_charged_count < 5 && round(voltage*1000000) == round(VOLTAGE_MAX*1000000)) {
-				fully_charged_count++;
-			} else {
-				fully_charged_count = 0;
+			if (fully_charged_count < 10) {
+				if (round(voltage*1000000) == round(VOLTAGE_MAX*1000000)) {
+					fully_charged_count++;
+				} else {
+					fully_charged_count = 0;
+				}
 			}
 			break;
 		case FULLY_CHARGED:
