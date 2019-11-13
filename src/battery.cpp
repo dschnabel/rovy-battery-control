@@ -38,6 +38,8 @@ using namespace std;
 #define CHARGING		0
 #define FULLY_CHARGED	1
 
+#define FULLY_CHARGED_COUNT 10
+
 #define LOG_FILE "/var/log/battery.log"
 #define BIN_FILE "/opt/voltTimes.bin"
 
@@ -342,7 +344,7 @@ int main(int argc, char *argv[]) {
 		logFile.open(LOG_FILE, ofstream::out | ofstream::app);
 
 		double voltage;
-		if (fully_charged_count < 10) {
+		if (fully_charged_count < FULLY_CHARGED_COUNT) {
 			voltage = getBatteryVoltage();
 		} else {
 			voltage = VOLTAGE_MAX;
@@ -368,7 +370,7 @@ int main(int argc, char *argv[]) {
 				voltageLine = voltage;
 				logFile  << ", " << getDurationEstimate(voltage);
 			}
-			if (fully_charged_count < 10) {
+			if (fully_charged_count < FULLY_CHARGED_COUNT) {
 				if (round(voltage*1000000) == round(VOLTAGE_MAX*1000000)) {
 					fully_charged_count++;
 				} else {
@@ -377,7 +379,9 @@ int main(int argc, char *argv[]) {
 			}
 			break;
 		case FULLY_CHARGED:
-			logFile << "fully-charged"; break;
+			logFile << "fully-charged";
+			fully_charged_count = FULLY_CHARGED_COUNT;
+			break;
 		}
 
 		logFile << endl;
