@@ -321,6 +321,14 @@ int main(int argc, char *argv[]) {
 	pinMode(PIN_BAT6, INPUT);
 	pinMode(PIN_ADC_ENABLE, OUTPUT);
 	pinMode(PIN_READ_VOLT, OUTPUT);
+
+	pullUpDnControl(PIN_CHARGING, PUD_DOWN);
+	pullUpDnControl(PIN_BAT1, PUD_DOWN);
+	pullUpDnControl(PIN_BAT2, PUD_DOWN);
+	pullUpDnControl(PIN_BAT3, PUD_DOWN);
+	pullUpDnControl(PIN_BAT4, PUD_DOWN);
+	pullUpDnControl(PIN_BAT5, PUD_DOWN);
+	pullUpDnControl(PIN_BAT6, PUD_DOWN);
 	i2c0Unlock();
 
 	// setup mcp3008 (analog to digital converter)
