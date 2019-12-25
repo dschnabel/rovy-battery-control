@@ -25,14 +25,10 @@ using namespace std;
 #define PIN_BAT4		105
 #define PIN_BAT5		106
 #define PIN_BAT6		107
-#define PIN_ADC_ENABLE	108
 #define PIN_READ_VOLT	109
 
 // mcp3008
 #define PIN_ANALOG1		200
-
-#define CS_ENABLE		0
-#define CS_DISABLE		1
 
 #define NOT_CHARGING   -1
 #define CHARGING		0
@@ -73,15 +69,17 @@ double getBatteryVoltage() {
 	int iterations = 10;
 
 	i2c0Lock();
-	spi0Lock();
 	digitalWrite(PIN_READ_VOLT, 1);
+	i2c0Unlock();
+
+	spi0Lock();
 	for (int i = 0; i < iterations; i++) {
-		digitalWrite(PIN_ADC_ENABLE, CS_ENABLE);
 		voltNumber += analogRead(PIN_ANALOG1);
-		digitalWrite(PIN_ADC_ENABLE, CS_DISABLE);
 	}
-	digitalWrite(PIN_READ_VOLT, 0);
 	spi0Unlock();
+
+	i2c0Lock();
+	digitalWrite(PIN_READ_VOLT, 0);
 	i2c0Unlock();
 
 	voltNumber /= iterations;
@@ -319,7 +317,6 @@ int main(int argc, char *argv[]) {
 	pinMode(PIN_BAT4, INPUT);
 	pinMode(PIN_BAT5, INPUT);
 	pinMode(PIN_BAT6, INPUT);
-	pinMode(PIN_ADC_ENABLE, OUTPUT);
 	pinMode(PIN_READ_VOLT, OUTPUT);
 
 	pullUpDnControl(PIN_CHARGING, PUD_DOWN);
