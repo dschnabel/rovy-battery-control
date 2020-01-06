@@ -355,6 +355,11 @@ int main(int argc, char *argv[]) {
 			voltage = VOLTAGE_MAX;
 		}
 
+		if (voltage == 0) {
+			// not connected to battery
+			continue;
+		}
+
 		logFile << time(0) << ", "
 				<< fixed << setprecision(2) << voltage << "V, "
 				<< getBatteryVoltagePercentage(voltage) << "%, ";
