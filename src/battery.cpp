@@ -25,7 +25,7 @@ using namespace std;
 #define PIN_BAT4		105
 #define PIN_BAT5		106
 #define PIN_BAT6		107
-#define PIN_READ_VOLT	109
+#define PIN_READ_VOLT	108
 
 // mcp3008
 #define PIN_ANALOG1		200
