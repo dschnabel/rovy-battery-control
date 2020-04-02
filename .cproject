@@ -37,7 +37,7 @@
                             							
                             <option id="cdt.managedbuild.option.gnu.cross.prefix.1027008084" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="arm-linux-gnueabihf-" valueType="string"/>
                             							
-                            <option id="cdt.managedbuild.option.gnu.cross.path.1333233573" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/home/daniel/pi4/cross-pi-gcc-9.1.0-2/bin" valueType="string"/>
+                            <option id="cdt.managedbuild.option.gnu.cross.path.1333233573" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/home/daniel/pi4/cross-compiler-pi/bin" valueType="string"/>
                             							
                             <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.770685457" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
                             							
@@ -195,7 +195,7 @@
                             							
                             <option id="cdt.managedbuild.option.gnu.cross.prefix.816520038" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="arm-linux-gnueabihf-" valueType="string"/>
                             							
-                            <option id="cdt.managedbuild.option.gnu.cross.path.1627978239" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/home/daniel/pi4/cross-pi-gcc-9.1.0-2/bin" valueType="string"/>
+                            <option id="cdt.managedbuild.option.gnu.cross.path.1627978239" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/home/daniel/pi4/cross-compiler-pi/bin" valueType="string"/>
                             							
                             <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.573809484" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
                             							

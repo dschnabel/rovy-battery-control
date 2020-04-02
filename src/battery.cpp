@@ -40,7 +40,7 @@ using namespace std;
 #define BIN_FILE "/opt/voltTimes.bin"
 
 #define VOLTAGE_MAX 25.288118
-#define VOLTAGE_MIN 18
+#define VOLTAGE_MIN 16.2 // 2.7V per cell
 
 typedef struct voltage_time_pair {
 	double voltage;
@@ -397,7 +397,7 @@ int main(int argc, char *argv[]) {
 		logFile << endl;
 		logFile.close();
 
-		if (status == NOT_CHARGING && voltage < 18) {
+		if (status == NOT_CHARGING && voltage < VOLTAGE_MIN) {
 			if (lowLevelCount >= 3) {
 				haltSystem();
 			}
