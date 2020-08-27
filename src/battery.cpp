@@ -342,10 +342,22 @@ int main(int argc, char *argv[]) {
 	double voltageLine = 0;
 	int prev_status = NOT_CHARGING;
 	int fully_charged_count = 0;
+	int done_charging_count = 0;
 
 	// main loop
 	while (1) {
 		delay(10000);
+
+        if (done_charging_count > 5) {
+            // shut down, but only if nobody is connected
+		    if (system("ps aux | grep 'sshd:' | grep -v grep") != 0) {
+                haltSystem();
+            } else {
+                // somebody is connected
+                continue;
+            }
+        }
+
 		logFile.open(LOG_FILE, ofstream::out | ofstream::app);
 
 		double voltage;
@@ -370,6 +382,7 @@ int main(int argc, char *argv[]) {
 		case NOT_CHARGING:
 			logFile << "not-charging";
 			fully_charged_count = 0;
+			done_charging_count = 0;
 			break;
 		case CHARGING:
 			logFile << "charging, " << cellMap;
@@ -387,10 +400,12 @@ int main(int argc, char *argv[]) {
 					fully_charged_count = 0;
 				}
 			}
+			done_charging_count = 0;
 			break;
 		case FULLY_CHARGED:
 			logFile << "fully-charged";
 			fully_charged_count = FULLY_CHARGED_COUNT;
+			done_charging_count++;
 			break;
 		}
 
